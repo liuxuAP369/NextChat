@@ -349,6 +349,13 @@ export function getHeaders(ignoreHeaders: boolean = false) {
 
   const authHeader = getAuthHeader();
 
+  if (isEnabledAccessControl && validString(accessStore.accessCode)) {
+    headers["Authorization"] = getBearerToken(
+      ACCESS_CODE_PREFIX + accessStore.accessCode,
+    );
+    return headers;
+  }
+
   const bearerToken = getBearerToken(
     apiKey,
     isAzure || isAnthropic || isGoogle,
@@ -356,10 +363,6 @@ export function getHeaders(ignoreHeaders: boolean = false) {
 
   if (bearerToken) {
     headers[authHeader] = bearerToken;
-  } else if (isEnabledAccessControl && validString(accessStore.accessCode)) {
-    headers["Authorization"] = getBearerToken(
-      ACCESS_CODE_PREFIX + accessStore.accessCode,
-    );
   }
 
   return headers;

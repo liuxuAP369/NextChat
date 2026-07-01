@@ -25,6 +25,9 @@ const en: LocaleType = {
     SubTips: "Or enter your OpenAI or Google API Key",
     Input: "access code",
     Confirm: "Confirm",
+    Checking: "Checking...",
+    InvalidAccessCode: "Invalid access code",
+    CheckFailed: "Failed to check access code, please try again later",
     Later: "Later",
     SaasTips: "Too Complex, Use Immediately Now",
     TopTips:

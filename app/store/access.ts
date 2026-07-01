@@ -64,6 +64,7 @@ const DEFAULT_AI302_URL = isApp ? AI302_BASE_URL : ApiPath["302.AI"];
 
 const DEFAULT_ACCESS_STATE = {
   accessCode: "",
+  accessCodeVerified: false,
   useCustomConfig: false,
 
   provider: ServiceProvider.OpenAI,
@@ -229,7 +230,11 @@ export const useAccessStore = createPersistStore(
     isAuthorized() {
       this.fetch();
 
-      // has token or has code or disabled access control
+      if (this.enabledAccessControl()) {
+        return ensure(get(), ["accessCode"]) && get().accessCodeVerified;
+      }
+
+      // Access control is disabled: users may provide their own provider keys.
       return (
         this.isValidOpenAI() ||
         this.isValidAzure() ||
@@ -245,8 +250,7 @@ export const useAccessStore = createPersistStore(
         this.isValidXAI() ||
         this.isValidChatGLM() ||
         this.isValidSiliconFlow() ||
-        !this.enabledAccessControl() ||
-        (this.enabledAccessControl() && ensure(get(), ["accessCode"]))
+        true
       );
     },
     fetch() {

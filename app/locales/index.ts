@@ -77,9 +77,9 @@ export const ALL_LANG_OPTIONS: Record<Lang, string> = {
 };
 
 const LANG_KEY = "lang";
-const DEFAULT_LANG = "en";
+const DEFAULT_LANG = "cn";
 
-const fallbackLang = en;
+const fallbackLang = cn;
 const targetLang = ALL_LANGS[getLang()] as LocaleType;
 
 // if target lang missing some fields, it will use fallback lang string
@@ -95,22 +95,11 @@ function setItem(key: string, value: string) {
   localStorage.setItem(key, value);
 }
 
-function getLanguage() {
-  try {
-    const locale = new Intl.Locale(navigator.language).maximize();
-    const region = locale?.region?.toLowerCase();
-    // 1. check region code in ALL_LANGS
-    if (AllLangs.includes(region as Lang)) {
-      return region as Lang;
-    }
-    // 2. check language code in ALL_LANGS
-    if (AllLangs.includes(locale.language as Lang)) {
-      return locale.language as Lang;
-    }
-    return DEFAULT_LANG;
-  } catch {
-    return DEFAULT_LANG;
-  }
+function getLanguage(): Lang {
+  // Default new visitors to Simplified Chinese instead of auto-selecting from
+  // the browser locale. Users can still override this from Settings, which is
+  // persisted in local storage under LANG_KEY.
+  return DEFAULT_LANG;
 }
 
 export function getLang(): Lang {

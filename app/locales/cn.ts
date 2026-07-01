@@ -24,6 +24,9 @@ const cn = {
     SubTips: "或者输入你的 OpenAI 或 Google AI 密钥",
     Input: "在此处填写访问码",
     Confirm: "确认",
+    Checking: "正在验证…",
+    InvalidAccessCode: "访问码不正确",
+    CheckFailed: "验证失败，请稍后再试",
     Later: "稍后再说",
     SaasTips: "配置太麻烦，想要立即使用",
     TopTips:

@@ -11,7 +11,7 @@ import Logo from "../icons/logo.svg";
 import { useMobileScreen } from "@/app/utils";
 import BotIcon from "../icons/bot.svg";
 import { getClientConfig } from "../config/client";
-import { PasswordInput } from "./ui-lib";
+import { PasswordInput, showToast } from "./ui-lib";
 import LeftIcon from "@/app/icons/left.svg";
 import { safeLocalStorage } from "@/app/utils";
 import {
@@ -26,7 +26,34 @@ export function AuthPage() {
   const navigate = useNavigate();
   const accessStore = useAccessStore();
   const goHome = () => navigate(Path.Home);
-  const goChat = () => navigate(Path.Chat);
+  const [isChecking, setIsChecking] = useState(false);
+  const goChat = async () => {
+    if (accessStore.enabledAccessControl()) {
+      setIsChecking(true);
+      try {
+        const res = await fetch("/api/access-code", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ accessCode: accessStore.accessCode }),
+        }).then((r) => r.json());
+
+        if (!res.ok) {
+          accessStore.update((access) => (access.accessCodeVerified = false));
+          showToast(Locale.Auth.InvalidAccessCode);
+          return;
+        }
+
+        accessStore.update((access) => (access.accessCodeVerified = true));
+      } catch {
+        showToast(Locale.Auth.CheckFailed);
+        return;
+      } finally {
+        setIsChecking(false);
+      }
+    }
+
+    navigate(Path.Chat);
+  };
   const goSaas = () => {
     trackAuthorizationPageButtonToCPaymentClick();
     window.location.href = SAAS_CHAT_URL;
@@ -36,6 +63,7 @@ export function AuthPage() {
     accessStore.update((access) => {
       access.openaiApiKey = "";
       access.accessCode = "";
+      access.accessCodeVerified = false;
     });
   }; // Reset access code to empty string
 
@@ -71,9 +99,10 @@ export function AuthPage() {
         type="text"
         placeholder={Locale.Auth.Input}
         onChange={(e) => {
-          accessStore.update(
-            (access) => (access.accessCode = e.currentTarget.value),
-          );
+          accessStore.update((access) => {
+            access.accessCode = e.currentTarget.value;
+            access.accessCodeVerified = false;
+          });
         }}
       />
 
@@ -111,7 +140,7 @@ export function AuthPage() {
 
       <div className={styles["auth-actions"]}>
         <IconButton
-          text={Locale.Auth.Confirm}
+          text={isChecking ? Locale.Auth.Checking : Locale.Auth.Confirm}
           type="primary"
           onClick={goChat}
         />
